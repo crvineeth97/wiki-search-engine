@@ -28,19 +28,19 @@ def create_inverted_index(handler):
             temp = ""
             temp += str(handler.id[i]) + " "
             if title[word]:
-                temp += "t-" + str(title[word]) + " "
+                temp += "t" + str(title[word]) + " "
             if body[word]:
-                temp += "b-"+str(body[word])+" "
+                temp += "b"+str(body[word])+" "
             if infobox[word]:
-                temp += "i-"+str(infobox[word])+" "
+                temp += "i"+str(infobox[word])+" "
             if categories[word]:
-                temp += "c-"+str(categories[word])+" "
+                temp += "c"+str(categories[word])+" "
             if external_links[word]:
-                temp += "e-"+str(external_links[word])+" "
+                temp += "e"+str(external_links[word])+" "
             if references[word]:
-                temp += "r-"+str(references[word])
+                temp += "r"+str(references[word])
             if inverted_index[word]:
-                inverted_index[word] += " | " + temp
+                inverted_index[word] += "|" + temp
             else:
                 inverted_index[word] = temp
     return inverted_index
