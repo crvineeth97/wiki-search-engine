@@ -8,7 +8,6 @@ Usage: python main.py <path-to-wiki-dump> <inverted-index-out-file>
 import sys
 from xml.sax import make_parser
 from handler import WikiHandler
-from inverted_index import create_inverted_index
 from merger import merge
 
 def main():

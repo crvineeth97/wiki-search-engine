@@ -1,6 +1,7 @@
 import sys
 from collections import defaultdict
 from operator import itemgetter
+from datetime import datetime
 from linecache import getline
 from os import path
 from processor import process_title
@@ -25,8 +26,9 @@ def binary_search(file, word):
         return line[1:]
 
 def search(query, index_file):
-    res = defaultdict(float)
+    result = []
     for word in query:
+        res = defaultdict(float)
         line = binary_search(index_file, word)
         if line is None:
             print "Word + \"" + word + "\" not found. Continuing..."
@@ -41,9 +43,23 @@ def search(query, index_file):
                     except ValueError:
                         continue
                 res[int(doc_id)] += tf_idf
-            for (key, val) in sorted(res.items(), key=itemgetter(1), reverse=True)[:10]:
-                title = getline(config.TITLE_FILE, key)
-                print title, val
+            result.append(res)
+    if len(result) > 1:
+        final = result[0].viewkeys() & result[1].viewkeys()
+    elif len(result) == 1:
+        final = result[0].viewkeys()
+    else:
+        print "No documents related to query found"
+        return
+    for i in range(2, len(result)):
+        final = final & result[i].viewkeys()
+    res = defaultdict(float)
+    for key in final:
+        for i in range(len(result)):
+            res[key] += result[i][key]
+    for (key, val) in sorted(res.items(), key=itemgetter(1), reverse=True)[:10]:
+        title = getline(config.TITLE_FILE, key + 1)
+        print title,
 
 
 
@@ -55,8 +71,11 @@ def main():
         \nThe top 10 relevant documents will be presented\nTo exit the prompt, use Ctrl+c"
     index_file = sys.argv[1]
     while True:
-        query = raw_input("Query >> ")
+        query = raw_input("\nQuery >> ")
+        start_time = datetime.now()
         search(process_title(query.encode("utf-8")), index_file)
+        end_time = datetime.now()
+        print "\n" + str((end_time - start_time).total_seconds()) + " seconds"
 
 if __name__ == "__main__":
     main()

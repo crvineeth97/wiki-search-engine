@@ -62,6 +62,7 @@ class WikiHandler(ContentHandler):
                 self.dump_index()
         if name == "title":
             self.title_flag = 0
+            print self.docs_length, self.title_tmp
             self.titles.append(self.title_tmp + "\n")
             title = process_title(self.title_tmp.encode('utf-8'))
             for word in title:
