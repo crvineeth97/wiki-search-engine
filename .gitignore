@@ -7,3 +7,4 @@ handler.pyc
 inverted_index.pyc
 out
 processor.pyc
+temp/

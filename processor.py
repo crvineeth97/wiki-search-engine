@@ -231,4 +231,5 @@ def process_text(text):
     body = get_body(text)
     infobox = get_infobox(text)
     categories = get_categories(text)
-    return (external_links, references, body, infobox, categories)
+    fields = {"e" : external_links, "r" : references, "b" : body, "i" : infobox, "c" : categories}
+    return fields
