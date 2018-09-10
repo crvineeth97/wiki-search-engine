@@ -13,6 +13,7 @@ class WikiHandler(ContentHandler):
     def __init__(self):
         self.docs_length = 0
         self.temp_files_length = 0
+        self.titles = []
         self.title_tmp = ""
         self.title_flag = 0
         self.text_tmp = ""
@@ -20,11 +21,15 @@ class WikiHandler(ContentHandler):
         self.index = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     def dump_index(self):
+        self.temp_files_length += 1
         if not path.exists(config.TEMP_OUT_DIR):
             mkdir(config.TEMP_OUT_DIR)
         out_file = config.TEMP_OUT_DIR + \
-            str(self.docs_length / config.MAX_DOCS_IN_MEMORY)
+            str(self.temp_files_length)
         words = sorted(self.index.keys())
+        with io.open(config.TITLE_FILE, "a", encoding="utf-8") as title_file:
+            title_file.writelines(self.titles)
+            self.titles = []
         with io.open(out_file, "w", encoding="utf-8") as f:
             for word in words:
                 line = word + '|'
@@ -36,12 +41,12 @@ class WikiHandler(ContentHandler):
                 line = line[:-1] + '\n'
                 f.write(unicode(line))
         self.index = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        self.temp_files_length += 1
 
     def startDocument(self):
         print "Starting document parsing"
 
     def endDocument(self):
+        self.dump_index()
         print "Finished parsing document"
 
     def startElement(self, name, attrs):
@@ -57,6 +62,7 @@ class WikiHandler(ContentHandler):
                 self.dump_index()
         if name == "title":
             self.title_flag = 0
+            self.titles.append(self.title_tmp + "\n")
             title = process_title(self.title_tmp.encode('utf-8'))
             for word in title:
                 self.index[word][self.docs_length]["t"] += 1

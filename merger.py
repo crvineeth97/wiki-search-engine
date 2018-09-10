@@ -1,4 +1,5 @@
 import config
+from math import log10
 from os import rename, path, mkdir
 from shutil import move
 
@@ -35,22 +36,28 @@ def merge_lines(line_1, line_2):
     return line
 
 
-def process_line(l):
+def process_line(l, num_total_docs):
     line = l[0]
     i = 1
     size = config.FIELDS_SIZE + 1
+    num_docs = (len(l) - 1) / size
+    idf = log10(num_total_docs / num_docs)
     while i < len(l):
+        tf = 0
         line += "|" + l[i]
         for k in range(size - 1):
             if (int(l[i+1+k])):
+                tf += int(l[i+1+k])
                 line += config.FIELDS[k] + l[i+1+k]
+        tf = log10(1 + tf)
+        line += "z" + "%.3f" % (tf * idf)
         i += size
     return line
 
-def merge_files(file1_id, file2_id, iteration, out_file = None):
+def merge_files(file1_id, file2_id, iteration, out_file = None, num_total_docs = None):
     file1 = config.TEMP_OUT_DIR + str(file1_id)
     file2 = config.TEMP_OUT_DIR + str(file2_id)
-    if not out_file:
+    if out_file is None:
         if file1_id == 1:
             out_file = config.TEMP_OUT_DIR + "tmp"
         else:
@@ -77,7 +84,7 @@ def merge_files(file1_id, file2_id, iteration, out_file = None):
                 line = l_2
                 l_2 = f_2.readline().rstrip()
             if flag:
-                line = process_line(line.split("|"))
+                line = process_line(line.split("|"), num_total_docs)
             lines.append(line + "\n")
             if len(lines) == config.MAX_LINES_IN_MEMORY:
                 out.writelines(lines)
@@ -85,7 +92,7 @@ def merge_files(file1_id, file2_id, iteration, out_file = None):
         while l_1:
             # print l_1
             if flag:
-                l_1 = process_line(l_1.split("|"))
+                l_1 = process_line(l_1.split("|"), num_total_docs)
             lines.append(l_1 + "\n")
             l_1 = f_1.readline().rstrip()
             if len(lines) == config.MAX_LINES_IN_MEMORY:
@@ -94,26 +101,29 @@ def merge_files(file1_id, file2_id, iteration, out_file = None):
         while l_2:
             # print l_2
             if flag:
-                l_2 = process_line(l_2.split("|"))
+                l_2 = process_line(l_2.split("|"), num_total_docs)
             lines.append(l_2 + "\n")
             l_2 = f_2.readline().rstrip()
             if len(lines) == config.MAX_LINES_IN_MEMORY:
                 out.writelines(lines)
                 lines = []
+        out.writelines(lines)
+        lines = []
     temp_dir = config.TEMP_OUT_DIR + "it" + str(iteration) + "/"
     if not path.exists(temp_dir):
         mkdir(temp_dir)
     move(file1, temp_dir + str(file1_id))
     move(file2, temp_dir + str(file2_id))
-    if file1_id == 1:
+    if not flag and file1_id == 1:
         move(out_file, file1)
 
-def merge(length, out_file):
+def merge(length, out_file, num_total_docs):
     iteration = 1
     while length > 1:
         # print length
         if length == 2:
-            merge_files(1, 2, iteration, out_file)
+            merge_files(1, 2, iteration, out_file, num_total_docs)
+            break
         for i in range(1, length+1, 2):
             if i == length:
                 move(config.TEMP_OUT_DIR + str(i),

@@ -14,23 +14,14 @@ from merger import merge
 def main():
     """Main function which is called first"""
     if len(sys.argv) < 3:
-        print("Usage: python3 main.py <path-to-wiki-dump> <inverted-index-out-file>")
+        print "Usage: python indexer.py <path-to-wiki-dump> <inverted-index-out-file>"
         return 1
-    # Need to write up a handler
     handler = WikiHandler()
     parser = make_parser()
     parser.setContentHandler(handler)
     dump = open(sys.argv[1], "r")
     parser.parse(dump)
-    merge(handler.temp_files_length)
-    # inverted_indices = create_inverted_index(handler)
-    # outfile = str(sys.argv[2])
-    # with open(outfile, "w") as f:
-    #     for i in sorted(inverted_indices.keys()):
-    #         f.write(i)
-    #         f.write(" ")
-    #         f.write(inverted_indices[i])
-    #         f.write("\n")
+    merge(handler.temp_files_length, sys.argv[2], handler.docs_length)
 
 if __name__ == "__main__":
     main()
