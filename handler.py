@@ -12,11 +12,11 @@ class WikiHandler(ContentHandler):
 
     def __init__(self):
         self.docs_length = 0
+        self.temp_files_length = 0
         self.title_tmp = ""
         self.title_flag = 0
         self.text_tmp = ""
         self.text_flag = 0
-        self.fields = ["b", "c", "e", "i", "r", "t"]
         self.index = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     def dump_index(self):
@@ -31,11 +31,12 @@ class WikiHandler(ContentHandler):
                 docs = sorted(self.index[word])
                 for doc_id in docs:
                     line += str(doc_id) + '|'
-                    for field in self.fields:
+                    for field in config.FIELDS:
                         line += str(self.index[word][doc_id][field]) + '|'
                 line = line[:-1] + '\n'
                 f.write(unicode(line))
         self.index = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        self.temp_files_length += 1
 
     def startDocument(self):
         print "Starting document parsing"
