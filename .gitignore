@@ -3,8 +3,6 @@ __pycache__
 201564080_Phase1*
 Dumps/ire-wiki-search-sample
 Dumps/enwiki-latest-pages-articles-multistream.xml.bz2
-handler.pyc
-inverted_index.pyc
-out
-processor.pyc
+*pyc
+out*
 temp/
